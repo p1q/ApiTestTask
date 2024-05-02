@@ -1,6 +1,9 @@
 package api.test.task.model;
 
+import api.test.task.annotation.UserIsAdult;
+import api.test.task.annotation.ValidBirthdate;
 import api.test.task.annotation.ValidEmail;
+import api.test.task.annotation.ValidOrEmptyPhone;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -19,8 +22,12 @@ public class User {
     @NotBlank
     private String lastName;
 
-    private LocalDate birthDate;
+    @ValidBirthdate
+    @UserIsAdult
+    private LocalDate birthdate;
 
     private String address;
+
+    @ValidOrEmptyPhone
     private String phoneNumber;
 }
