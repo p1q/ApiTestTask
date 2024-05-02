@@ -1,6 +1,7 @@
 package api.test.task.model;
 
-import jakarta.validation.constraints.NotEmpty;
+import api.test.task.annotation.ValidEmail;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -9,16 +10,15 @@ import java.time.LocalDate;
 public class User {
     private Long id;
 
-    @NotEmpty
+    @ValidEmail
     private String email;
 
-    @NotEmpty
+    @NotBlank
     private String firstName;
 
-    @NotEmpty
+    @NotBlank
     private String lastName;
 
-    @NotEmpty
     private LocalDate birthDate;
 
     private String address;
