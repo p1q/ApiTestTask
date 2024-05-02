@@ -1,7 +1,6 @@
 package api.test.task.validator;
 
 import api.test.task.annotation.UserIsAdult;
-import api.test.task.annotation.ValidOrEmptyPhone;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
