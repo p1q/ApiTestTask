@@ -1,6 +1,5 @@
 package api.test.task.model;
 
-import api.test.task.annotation.UserIsAdult;
 import api.test.task.annotation.ValidBirthdate;
 import api.test.task.annotation.ValidEmail;
 import api.test.task.annotation.ValidOrEmptyPhone;
@@ -23,7 +22,6 @@ public class User {
     private String lastName;
 
     @ValidBirthdate
-    @UserIsAdult
     private LocalDate birthdate;
 
     private String address;

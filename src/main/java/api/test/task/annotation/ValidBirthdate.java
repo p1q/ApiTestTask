@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = BirthdateValidator.class)
 public @interface ValidBirthdate {
-    String message() default "Invalid birthdate format (must be YYYY-MM-DD) / Date must be earlier than current date";
+    String message() default "Birthdate must be earlier than current date";
     Class<?>[] groups() default {}; 
     Class<? extends Payload>[] payload() default {};
 }
