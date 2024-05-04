@@ -4,11 +4,10 @@ import api.test.task.annotation.ValidOrEmptyPhone;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PhoneValidator implements ConstraintValidator<ValidOrEmptyPhone, String> {
-    private static final String EMAIL_PATTERN = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+    private static final String PHONE_PATTERN = "^$|^(\\+[0-9]{1,3})?[0-9]{9,14}$";
 
     @Override
     public void initialize(ValidOrEmptyPhone constraintAnnotation) {
@@ -16,13 +15,12 @@ public class PhoneValidator implements ConstraintValidator<ValidOrEmptyPhone, St
     }
 
     @Override
-    public boolean isValid(String email, ConstraintValidatorContext context) {
-        return validateEmail(email);
-    }
+    public boolean isValid(String phone, ConstraintValidatorContext context) {
+        if (phone == null) {
+            return true;
+        }
 
-    private boolean validateEmail(String email) {
-        Pattern pattern = Pattern.compile(EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
+        Pattern pattern = Pattern.compile(PHONE_PATTERN);
+        return pattern.matcher(phone).matches();
     }
 }

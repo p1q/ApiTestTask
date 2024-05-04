@@ -3,12 +3,13 @@ package api.test.task.validator;
 import api.test.task.annotation.UserIsAdult;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.time.LocalDate;
 
-public class AdultValidator implements ConstraintValidator<UserIsAdult, String> {
-    private static final String EMAIL_PATTERN = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+public class AdultValidator implements ConstraintValidator<UserIsAdult, LocalDate> {
+    @Value("${min.user.age}")
+    private int minUserAge;
 
     @Override
     public void initialize(UserIsAdult constraintAnnotation) {
@@ -16,13 +17,9 @@ public class AdultValidator implements ConstraintValidator<UserIsAdult, String> 
     }
 
     @Override
-    public boolean isValid(String email, ConstraintValidatorContext context) {
-        return validateEmail(email);
-    }
-
-    private boolean validateEmail(String email) {
-        Pattern pattern = Pattern.compile(EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
+    public boolean isValid(LocalDate birthdate, ConstraintValidatorContext context) {
+        LocalDate today = LocalDate.now();
+        LocalDate userAdultDate = today.minusYears(minUserAge);
+        return birthdate.isBefore(userAdultDate);
     }
 }
