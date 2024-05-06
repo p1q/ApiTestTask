@@ -1,5 +1,6 @@
 package api.test.task.controller;
 
+import api.test.task.exception.IneligibleUserAgeException;
 import api.test.task.model.User;
 import api.test.task.service.UserService;
 import jakarta.validation.Valid;
@@ -34,8 +35,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-
-        // Логіка для створення користувача...
+        userService.create(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
@@ -86,8 +86,13 @@ public class UserController {
         return ResponseEntity.unprocessableEntity().body(errors);
     }
 
+    @ExceptionHandler(IneligibleUserAgeException.class)
+    public ResponseEntity<String> handleIneligibleUserAgeException(IneligibleUserAgeException e) {
+        return ResponseEntity.unprocessableEntity().body(e.getMessage());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public ResponseEntity<String> handleNotReadableException(HttpMessageNotReadableException e) {
         return ResponseEntity.badRequest().body("Invalid request body: %s".formatted(e.getMessage()));
     }
 }

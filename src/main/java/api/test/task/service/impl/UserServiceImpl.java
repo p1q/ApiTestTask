@@ -1,12 +1,14 @@
 package api.test.task.service.impl;
 
 import api.test.task.dao.UserDao;
+import api.test.task.exception.IneligibleUserAgeException;
 import api.test.task.model.User;
 import api.test.task.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +20,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void create(User user) {
-        userDao.add(user);
+        if (!isUserAdult(user)) {
+            throw new IneligibleUserAgeException();
+        }
+        userDao.create(user);
     }
 
     @Override
@@ -43,4 +48,8 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    private boolean isUserAdult(User user) {
+        LocalDate adultDate = user.getBirthdate().plusYears(18);
+        return !adultDate.isAfter(LocalDate.now()) || adultDate.isEqual(LocalDate.now());
+    }
 }
