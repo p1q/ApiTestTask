@@ -27,13 +27,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> get(Long userId) {
-        return userDao.get(userId);
+    public List<User> getAll() {
+        return userDao.getAll();
     }
 
     @Override
-    public List<User> getAll() {
-        return userDao.getAll();
+    public Optional<User> get(String userId) {
+        return userDao.get(userId);
     }
 
     @Transactional

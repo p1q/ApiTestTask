@@ -46,14 +46,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable("userId") Long userId) {
+    public ResponseEntity<User> getUser(@PathVariable("userId") String userId) {
         Optional<User> user = userService.get(userId);
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable("userId") Long userId, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable("userId") String userId, @RequestBody User user) {
         Optional<User> existingUser = userService.get(userId);
         if (existingUser.isPresent()) {
             User updatedUser = userService.update(user);
@@ -64,7 +64,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable("userId") Long userId) {
+    public ResponseEntity<Void> deleteUser(@PathVariable("userId") String userId) {
         Optional<User> user = userService.get(userId);
         if (user.isPresent()) {
             //userService.delete(userId);

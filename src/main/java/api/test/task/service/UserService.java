@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface UserService {
     void create(User user);
 
-    Optional<User> get(Long userId);
+    Optional<User> get(String userId);
 
     List<User> getAll();
 

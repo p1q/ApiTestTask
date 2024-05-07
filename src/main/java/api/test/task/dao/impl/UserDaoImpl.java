@@ -24,15 +24,13 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public Optional<User> get(Long userId) {
-        //User user = sessionFactory.getCurrentSession().get(User.class, userId);
-        //return Optional.ofNullable(user);
-        return null;
+    public List<User> getAll() {
+        return mongoTemplate.findAll(User.class);
     }
 
     @Override
-    public List<User> getAll() {
-        return null;
+    public Optional<User> get(String userId) {
+        return Optional.ofNullable(mongoTemplate.findById(userId, User.class));
     }
 
     @Override
