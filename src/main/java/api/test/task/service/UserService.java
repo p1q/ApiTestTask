@@ -1,12 +1,13 @@
 package api.test.task.service;
 
 import api.test.task.model.User;
+import com.mongodb.client.result.DeleteResult;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    void create(User user);
+    User create(User user);
 
     Optional<User> get(String userId);
 
@@ -14,5 +15,5 @@ public interface UserService {
 
     User update(User user);
 
-    void delete(User user);
+    DeleteResult delete(User user);
 }

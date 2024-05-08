@@ -2,6 +2,7 @@ package api.test.task.dao.impl;
 
 import api.test.task.dao.UserDao;
 import api.test.task.model.User;
+import com.mongodb.client.result.DeleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
@@ -19,8 +20,8 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void create(User user) {
-        mongoTemplate.save(user);
+    public User create(User user) {
+        return mongoTemplate.save(user);
     }
 
     @Override
@@ -34,12 +35,12 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void update(User user) {
-
+    public User update(User user) {
+        return mongoTemplate.save(user);
     }
 
     @Override
-    public void delete(User user) {
-
+    public DeleteResult delete(User user) {
+        return mongoTemplate.remove(user);
     }
 }

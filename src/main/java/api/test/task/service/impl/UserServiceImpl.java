@@ -4,9 +4,9 @@ import api.test.task.dao.UserDao;
 import api.test.task.exception.IneligibleUserAgeException;
 import api.test.task.model.User;
 import api.test.task.service.UserService;
+import com.mongodb.client.result.DeleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,11 +19,11 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
     @Override
-    public void create(User user) {
+    public User create(User user) {
         if (!isUserAdult(user)) {
             throw new IneligibleUserAgeException();
         }
-        userDao.create(user);
+        return userDao.create(user);
     }
 
     @Override
@@ -36,16 +36,14 @@ public class UserServiceImpl implements UserService {
         return userDao.get(userId);
     }
 
-    @Transactional
     @Override
     public User update(User user) {
-        userDao.update(user);
-        return null;
+        return userDao.update(user);
     }
 
     @Override
-    public void delete(User user) {
-
+    public DeleteResult delete(User user) {
+        return userDao.delete(user);
     }
 
     private boolean isUserAdult(User user) {

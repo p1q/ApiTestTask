@@ -53,21 +53,21 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable("userId") String userId, @RequestBody User user) {
-        Optional<User> existingUser = userService.get(userId);
-        if (existingUser.isPresent()) {
+    public ResponseEntity<User> updateUser(@PathVariable("userId") String userId, @Valid @RequestBody User user) {
+        Optional<User> updatingUser = userService.get(userId);
+        if (updatingUser.isPresent()) {
+            user.setId(userId);
             User updatedUser = userService.update(user);
             return ResponseEntity.ok(updatedUser);
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable("userId") String userId) {
         Optional<User> user = userService.get(userId);
         if (user.isPresent()) {
-            //userService.delete(userId);
+            userService.delete(user.get());
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
