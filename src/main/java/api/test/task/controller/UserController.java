@@ -39,6 +39,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private static final Integer UNPROCESSABLE_ENTITY = 422;
+    private static final Integer BAD_REQUEST = 400;
+    private static final Integer INTERNAL_SERVER_ERROR = 500;
 
     @Autowired
     private UserService userService;
@@ -127,35 +130,30 @@ public class UserController {
 
     @ExceptionHandler(IneligibleUserAgeException.class)
     public ResponseEntity<ExceptionResponse> handleIneligibleUserAgeException(IneligibleUserAgeException e) {
-        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
-                .errors(Collections.singletonList(
-                        ExceptionResponse.Error.builder()
-                                .code(422)
-                                .detail(e.getMessage())
-                                .build()))
-                .build();
-        return ResponseEntity.unprocessableEntity().body(exceptionResponse);
+        return ResponseEntity.unprocessableEntity().body(getExceptionResponse(e.getMessage(), UNPROCESSABLE_ENTITY));
     }
 
     @ExceptionHandler(IncorrectSearchDateRangeException.class)
-    public ResponseEntity<String> handleIncorrectSearchDateRangeException(IncorrectSearchDateRangeException e) {
-        return ResponseEntity.unprocessableEntity().body(e.getMessage());
+    public ResponseEntity<ExceptionResponse> handleIncorrectSearchDateRangeException(IncorrectSearchDateRangeException e) {
+        return ResponseEntity.unprocessableEntity().body(getExceptionResponse(e.getMessage(), UNPROCESSABLE_ENTITY));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleNotReadableException(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest().body("Invalid request body: %s".formatted(e.getMessage()));
+    public ResponseEntity<ExceptionResponse> handleNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest()
+                .body(getExceptionResponse("Invalid request body: %s".formatted(e.getMessage()), BAD_REQUEST));
     }
 
     @ExceptionHandler(DataAccessResourceFailureException.class)
-    public ResponseEntity<String> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to connect to the database: " + e.getMessage());
+    public ResponseEntity<ExceptionResponse> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
+        return ResponseEntity.internalServerError().body(getExceptionResponse("Failed to connect to the database: %s"
+                .formatted(e.getMessage()), INTERNAL_SERVER_ERROR));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleOtherException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+    public ResponseEntity<ExceptionResponse> handleOtherException(Exception e) {
+        return ResponseEntity.internalServerError().body(getExceptionResponse("An error occurred: %s"
+                .formatted(e.getMessage()), INTERNAL_SERVER_ERROR));
     }
 
     private void setUserFilledFields(User user, UserUpdateObject userUpdateObject) {
@@ -177,5 +175,15 @@ public class UserController {
         if (userUpdateObject.getPhoneNumber() != null && !userUpdateObject.getPhoneNumber().isEmpty()) {
             user.setPhoneNumber(userUpdateObject.getPhoneNumber());
         }
+    }
+
+    private ExceptionResponse getExceptionResponse(String detail, Integer code) {
+        return ExceptionResponse.builder()
+                .errors(Collections.singletonList(
+                        ExceptionResponse.Error.builder()
+                                .code(code)
+                                .detail(detail)
+                                .build()))
+                .build();
     }
 }
