@@ -1,6 +1,8 @@
 package api.test.task.controller;
 
+import api.test.task.exception.IncorrectSearchDateRangeException;
 import api.test.task.exception.IneligibleUserAgeException;
+import api.test.task.model.ExceptionResponse;
 import api.test.task.model.User;
 import api.test.task.model.UserUpdateObject;
 import api.test.task.service.UserService;
@@ -8,6 +10,7 @@ import com.mongodb.client.result.DeleteResult;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -23,8 +26,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +60,16 @@ public class UserController {
         Optional<User> user = userService.get(userId);
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<User>> searchUsersByBirthdateRange(
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+
+
+        List<User> users = userService.searchUsers(fromDate, toDate);
+        return ResponseEntity.ok(users);
     }
 
     @PutMapping("/{userId}")
@@ -110,7 +126,19 @@ public class UserController {
     }
 
     @ExceptionHandler(IneligibleUserAgeException.class)
-    public ResponseEntity<String> handleIneligibleUserAgeException(IneligibleUserAgeException e) {
+    public ResponseEntity<ExceptionResponse> handleIneligibleUserAgeException(IneligibleUserAgeException e) {
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .errors(Collections.singletonList(
+                        ExceptionResponse.Error.builder()
+                                .code(422)
+                                .detail(e.getMessage())
+                                .build()))
+                .build();
+        return ResponseEntity.unprocessableEntity().body(exceptionResponse);
+    }
+
+    @ExceptionHandler(IncorrectSearchDateRangeException.class)
+    public ResponseEntity<String> handleIncorrectSearchDateRangeException(IncorrectSearchDateRangeException e) {
         return ResponseEntity.unprocessableEntity().body(e.getMessage());
     }
 
@@ -123,6 +151,11 @@ public class UserController {
     public ResponseEntity<String> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to connect to the database: " + e.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleOtherException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
     }
 
     private void setUserFilledFields(User user, UserUpdateObject userUpdateObject) {

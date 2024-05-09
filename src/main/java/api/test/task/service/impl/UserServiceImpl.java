@@ -1,11 +1,13 @@
 package api.test.task.service.impl;
 
 import api.test.task.dao.UserDao;
+import api.test.task.exception.IncorrectSearchDateRangeException;
 import api.test.task.exception.IneligibleUserAgeException;
 import api.test.task.model.User;
 import api.test.task.service.UserService;
 import com.mongodb.client.result.DeleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -34,6 +36,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> get(String userId) {
         return userDao.get(userId);
+    }
+
+    @Override
+    public List<User> searchUsers(LocalDate fromDate, LocalDate toDate) {
+        if (toDate.isBefore(fromDate)) {
+            throw new IncorrectSearchDateRangeException();
+        }
+
+        return userDao.searchUsers(fromDate, toDate);
     }
 
     @Override
