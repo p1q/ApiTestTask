@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = PhoneValidator.class)
-public @interface ValidOrEmptyPhone {
+public @interface ValidOrNullPhone {
     String message() default "Phone number must be valid or empty";
     Class<?>[] groups() default {}; 
     Class<? extends Payload>[] payload() default {};
