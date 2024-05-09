@@ -7,6 +7,7 @@ import api.test.task.service.UserService;
 import com.mongodb.client.result.DeleteResult;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -90,7 +91,7 @@ public class UserController {
             if (deleteResult.wasAcknowledged() && deleteResult.getDeletedCount() > 0) {
                 return ResponseEntity.noContent().build();
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete user");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete the user");
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -116,6 +117,12 @@ public class UserController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleNotReadableException(HttpMessageNotReadableException e) {
         return ResponseEntity.badRequest().body("Invalid request body: %s".formatted(e.getMessage()));
+    }
+
+    @ExceptionHandler(DataAccessResourceFailureException.class)
+    public ResponseEntity<String> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to connect to the database: " + e.getMessage());
     }
 
     private void setUserFilledFields(User user, UserUpdateObject userUpdateObject) {
