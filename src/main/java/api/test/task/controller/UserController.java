@@ -4,6 +4,7 @@ import api.test.task.exception.IneligibleUserAgeException;
 import api.test.task.model.User;
 import api.test.task.model.UserUpdateObject;
 import api.test.task.service.UserService;
+import com.mongodb.client.result.DeleteResult;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,11 +83,14 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable("userId") String userId) {
+    public ResponseEntity<String> deleteUser(@PathVariable("userId") String userId) {
         Optional<User> user = userService.get(userId);
         if (user.isPresent()) {
-            userService.delete(user.get());
-            return ResponseEntity.noContent().build();
+            DeleteResult deleteResult = userService.delete(user.get());
+            if (deleteResult.wasAcknowledged() && deleteResult.getDeletedCount() > 0) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete user");
         } else {
             return ResponseEntity.notFound().build();
         }
