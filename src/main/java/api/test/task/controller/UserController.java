@@ -30,11 +30,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -117,15 +119,13 @@ public class UserController {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException e) {
+    public ResponseEntity<ExceptionResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
         BindingResult result = e.getBindingResult();
-        Map<String, String> errors = new HashMap<>();
+        List<String> details = result.getFieldErrors().stream()
+                .map(error -> "%s: %s".formatted(error.getField(), error.getDefaultMessage()))
+                .toList();
 
-        for (FieldError error : result.getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
-
-        return ResponseEntity.unprocessableEntity().body(errors);
+        return ResponseEntity.unprocessableEntity().body(getMultipleExceptionResponse(details));
     }
 
     @ExceptionHandler(IneligibleUserAgeException.class)
@@ -184,6 +184,17 @@ public class UserController {
                                 .code(code)
                                 .detail(detail)
                                 .build()))
+                .build();
+    }
+
+    private ExceptionResponse getMultipleExceptionResponse(List<String> details) {
+        List<ExceptionResponse.Error> errorList = details.stream().map(detail -> ExceptionResponse.Error.builder()
+                .code(UNPROCESSABLE_ENTITY)
+                .detail(detail)
+                .build()).toList();
+
+        return ExceptionResponse.builder()
+                .errors(errorList)
                 .build();
     }
 }
