@@ -1,14 +1,19 @@
 package api.test.task.controller;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import api.test.task.model.User;
+import api.test.task.model.UserUpdateObject;
 import api.test.task.service.UserService;
+import com.mongodb.client.result.DeleteResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,7 +203,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser() {
+    void testUpdateUser_ShouldReturnUpdatedUser() {
     }
 
     @Test
@@ -206,7 +211,25 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUser() {
+    void testDeleteUser_ShouldReturn204() throws Exception {
+        User user = new User();
+        user.setId("ID1");
+        user.setEmail("mail@gmail.com");
+        user.setFirstName("Serj");
+        user.setLastName("Petrenko");
+        user.setBirthdate(LocalDate.of(2001, 10, 18));
+        user.setAddress("Vul, 2, Kiyv, Ukraine");
+        user.setPhoneNumber("+380932541254");
+
+        when(userService.get("ID1")).thenReturn(Optional.of(user));
+
+        DeleteResult deleteResult = mock(DeleteResult.class);
+        when(deleteResult.wasAcknowledged()).thenReturn(true);
+        when(deleteResult.getDeletedCount()).thenReturn(1L);
+        when(userService.delete(user)).thenReturn(deleteResult);
+
+        mockMvc.perform(delete("/users/{userId}", "ID1"))
+                .andExpect(status().isNoContent());
     }
 
     @Test
