@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import api.test.task.model.User;
-import api.test.task.model.UserUpdateObject;
 import api.test.task.service.UserService;
 import com.mongodb.client.result.DeleteResult;
 import org.junit.jupiter.api.Test;
@@ -203,11 +202,71 @@ class UserControllerTest {
     }
 
     @Test
-    void testUpdateUser_ShouldReturnUpdatedUser() {
+    public void testUpdateUser_ShouldReturnUpdatedUser() throws Exception {
+        User user = new User();
+        user.setId("ID1");
+        user.setEmail("mail@gmail.com");
+        user.setFirstName("Serj");
+        user.setLastName("Petrenko");
+        user.setBirthdate(LocalDate.of(2001, 10, 18));
+        user.setAddress("Vul, 2, Kiyv, Ukraine");
+        user.setPhoneNumber("+380932541254");
+
+        String updatedEmail = "updatedMail@gmail.com";
+        String updatedFirstName = "Petro";
+        user.setEmail(updatedEmail);
+        user.setFirstName(updatedFirstName);
+
+        when(userService.get("ID1")).thenReturn(Optional.of(user));
+        when(userService.update(user)).thenReturn(user);
+
+        String userJson = "{\"id\":\"ID1\",\"email\":\"" + updatedEmail + "\",\"firstName\":\"" + updatedFirstName + "\",\"lastName\":\"Petrenko\",\"birthdate\":\"2001-10-18\",\"address\":\"Vul, 2, Kiyv, Ukraine\",\"phoneNumber\":\"+380932541254\"}";
+
+        mockMvc.perform(put("/users/{userId}", "ID1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("ID1"))
+                .andExpect(jsonPath("$.email").value(updatedEmail))
+                .andExpect(jsonPath("$.firstName").value(updatedFirstName))
+                .andExpect(jsonPath("$.lastName").value("Petrenko"))
+                .andExpect(jsonPath("$.birthdate").value("2001-10-18"))
+                .andExpect(jsonPath("$.address").value("Vul, 2, Kiyv, Ukraine"))
+                .andExpect(jsonPath("$.phoneNumber").value("+380932541254"));
     }
 
     @Test
-    void partialUpdateUser() {
+    void testPartialUpdateUser_ShouldReturnUpdatedUser() throws Exception {
+        User user = new User();
+        user.setId("ID1");
+        user.setEmail("mail@gmail.com");
+        user.setFirstName("Serj");
+        user.setLastName("Petrenko");
+        user.setBirthdate(LocalDate.of(2001, 10, 18));
+        user.setAddress("Vul, 2, Kiyv, Ukraine");
+        user.setPhoneNumber("+380932541254");
+
+        String updatedEmail = "updatedMail@gmail.com";
+        String updatedFirstName = "Petro";
+        user.setEmail(updatedEmail);
+        user.setFirstName(updatedFirstName);
+
+        when(userService.get("ID1")).thenReturn(Optional.of(user));
+        when(userService.update(user)).thenReturn(user);
+
+        String partialUpdateJson = "{\"email\":\"" + updatedEmail + "\",\"firstName\":\"" + updatedFirstName + "\"}";
+
+        mockMvc.perform(patch("/users/{userId}", "ID1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(partialUpdateJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("ID1"))
+                .andExpect(jsonPath("$.email").value(updatedEmail))
+                .andExpect(jsonPath("$.firstName").value(updatedFirstName))
+                .andExpect(jsonPath("$.lastName").value("Petrenko"))
+                .andExpect(jsonPath("$.birthdate").value("2001-10-18"))
+                .andExpect(jsonPath("$.address").value("Vul, 2, Kiyv, Ukraine"))
+                .andExpect(jsonPath("$.phoneNumber").value("+380932541254"));
     }
 
     @Test
