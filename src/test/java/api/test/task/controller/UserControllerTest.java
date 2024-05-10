@@ -1,5 +1,6 @@
 package api.test.task.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -10,9 +11,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import api.test.task.exception.IncorrectSearchDateRangeException;
+import api.test.task.exception.IneligibleUserAgeException;
 import api.test.task.model.User;
 import api.test.task.service.UserService;
 import com.mongodb.client.result.DeleteResult;
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +29,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
@@ -36,7 +42,7 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private UserService userServiceMock;
 
     @Autowired
     private LocalValidatorFactoryBean validatorFactoryBean;
@@ -91,7 +97,7 @@ class UserControllerTest {
         user2.setAddress("Vul, 5, Kharkiv, Ukraine");
         user2.setPhoneNumber("+380971234567");
 
-        when(userService.getAll()).thenReturn(Arrays.asList(user1, user2));
+        when(userServiceMock.getAll()).thenReturn(Arrays.asList(user1, user2));
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
@@ -123,7 +129,7 @@ class UserControllerTest {
         user.setAddress("Vul, 2, Kiyv, Ukraine");
         user.setPhoneNumber("+380932541254");
 
-        when(userService.get("ID1")).thenReturn(Optional.of(user));
+        when(userServiceMock.get("ID1")).thenReturn(Optional.of(user));
         ResultActions resultActions = mockMvc.perform(get("/users/{userId}", "ID1"));
 
         resultActions
@@ -178,7 +184,7 @@ class UserControllerTest {
         user4.setAddress("Vul, 3, Lviv, Ukraine");
         user4.setPhoneNumber("+380501234567");
 
-        when(userService.searchUsers(fromDate, toDate)).thenReturn(Arrays.asList(user4, user2));
+        when(userServiceMock.searchUsers(fromDate, toDate)).thenReturn(Arrays.asList(user4, user2));
 
         mockMvc.perform(get("/users/search")
                         .param("from", fromDate.toString())
@@ -217,8 +223,8 @@ class UserControllerTest {
         user.setEmail(updatedEmail);
         user.setFirstName(updatedFirstName);
 
-        when(userService.get("ID1")).thenReturn(Optional.of(user));
-        when(userService.update(user)).thenReturn(user);
+        when(userServiceMock.get("ID1")).thenReturn(Optional.of(user));
+        when(userServiceMock.update(user)).thenReturn(user);
 
         String userJson = "{\"id\":\"ID1\",\"email\":\"" + updatedEmail + "\",\"firstName\":\"" + updatedFirstName + "\",\"lastName\":\"Petrenko\",\"birthdate\":\"2001-10-18\",\"address\":\"Vul, 2, Kiyv, Ukraine\",\"phoneNumber\":\"+380932541254\"}";
 
@@ -251,8 +257,8 @@ class UserControllerTest {
         user.setEmail(updatedEmail);
         user.setFirstName(updatedFirstName);
 
-        when(userService.get("ID1")).thenReturn(Optional.of(user));
-        when(userService.update(user)).thenReturn(user);
+        when(userServiceMock.get("ID1")).thenReturn(Optional.of(user));
+        when(userServiceMock.update(user)).thenReturn(user);
 
         String partialUpdateJson = "{\"email\":\"" + updatedEmail + "\",\"firstName\":\"" + updatedFirstName + "\"}";
 
@@ -280,27 +286,73 @@ class UserControllerTest {
         user.setAddress("Vul, 2, Kiyv, Ukraine");
         user.setPhoneNumber("+380932541254");
 
-        when(userService.get("ID1")).thenReturn(Optional.of(user));
+        when(userServiceMock.get("ID1")).thenReturn(Optional.of(user));
 
         DeleteResult deleteResult = mock(DeleteResult.class);
         when(deleteResult.wasAcknowledged()).thenReturn(true);
         when(deleteResult.getDeletedCount()).thenReturn(1L);
-        when(userService.delete(user)).thenReturn(deleteResult);
+        when(userServiceMock.delete(user)).thenReturn(deleteResult);
 
         mockMvc.perform(delete("/users/{userId}", "ID1"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void handleValidationExceptions() {
+    public void testHandleValidationExceptions_ShouldReturn422() throws Exception {
+        when(userServiceMock.create(any(User.class))).thenThrow(new ValidationException("Validation failed"));
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
-    void handleIneligibleUserAgeException() {
+    void handleIneligibleUserAgeException_ShouldReturn422WhenUserYounger18() throws Exception {
+        User user = new User();
+        user.setId("ID1");
+        user.setEmail("mail@gmail.com");
+        user.setFirstName("Serj");
+        user.setLastName("Petrenko");
+        user.setBirthdate(LocalDate.now().minusYears(16));
+        user.setAddress("Vul, 2, Kiyv, Ukraine");
+        user.setPhoneNumber("+380932541254");
+
+        when(userServiceMock.create(any(User.class))).thenAnswer(invocation -> {
+            User createdUser = invocation.getArgument(0);
+            if (Period.between(createdUser.getBirthdate(), LocalDate.now()).getYears() < 18) {
+                throw new IneligibleUserAgeException();
+            }
+            return createdUser;
+        });
+
+        String userJson = "{\"id\":\"" + user.getId() + "\",\"email\":\"" + user.getEmail() + "\",\"firstName\":\"" + user.getFirstName() + "\",\"lastName\":\"" + user.getLastName() + "\",\"birthdate\":\"" + user.getBirthdate() + "\",\"address\":\"" + user.getAddress() + "\",\"phoneNumber\":\"" + user.getPhoneNumber() + "\"}";
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
-    void handleIncorrectSearchDateRangeException() {
+    public void testHandleIncorrectSearchDateRangeException_ShouldReturn422WhenDateFromLaterDateTo() throws Exception {
+        LocalDate dateFrom = LocalDate.of(2030, 6, 1);
+        LocalDate dateTo = LocalDate.of(2023, 12, 31);
+
+        when(userServiceMock.searchUsers(any(LocalDate.class), any(LocalDate.class)))
+                .then(invocation -> {
+                    LocalDate from = invocation.getArgument(0);
+                    LocalDate to = invocation.getArgument(1);
+                    if (from.isAfter(to)) {
+                        throw new IncorrectSearchDateRangeException();
+                    } else {
+                        return Collections.emptyList();
+                    }
+                });
+
+        mockMvc.perform(get("/users/search")
+                        .param("from", dateFrom.toString())
+                        .param("to", dateTo.toString()))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
