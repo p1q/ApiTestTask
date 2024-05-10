@@ -1,7 +1,6 @@
 <h1 align="center">RESTful API Test Task</h1>
 
 <p align="center"><img src="https://github.com/p1q/ApiTestTask/blob/main/src/main/resources/logo.png" title="RESTful API Test Task Logo" alt="RESTful API Test Task Logo" /></p>
-
 <p>This is a basic functional RESTful User API written in Java. It conforms to the MVC design pattern, the application has a DAO layer implementation.</p>
 <p>In the current implementation, the API provides the ability to create a user, to update some/all user fields,  delete the user and search for users by birth date range.</p>
 <p>Various data validity checks have also been added.</p>
