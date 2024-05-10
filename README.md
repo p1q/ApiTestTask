@@ -12,6 +12,7 @@
 - MongoDB Database
 - Jackson
 - Apache Tomcat
+- JUnit 5 for Testing
 - Log4j Logging
 
 ## :rocket: How to run
