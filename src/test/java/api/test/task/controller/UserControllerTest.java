@@ -354,16 +354,4 @@ class UserControllerTest {
                         .param("to", dateTo.toString()))
                 .andExpect(status().isUnprocessableEntity());
     }
-
-    @Test
-    void handleNotReadableException() {
-    }
-
-    @Test
-    void handleDataAccessResourceFailureException() {
-    }
-
-    @Test
-    void handleOtherException() {
-    }
 }
