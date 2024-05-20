@@ -1,40 +1,41 @@
-<h1 align="center">RESTful API Test Task</h1>
+Clear Solutions
+Trainee/Junior Java Developer Test Task
 
-<p align="center"><img src="https://github.com/p1q/ApiTestTask/blob/main/src/main/resources/logo.png" title="RESTful API Test Task Logo" alt="RESTful API Test Task Logo" /></p>
-<p>This is a basic functional RESTful User API written in Java. It conforms to the MVC design pattern, the application has a DAO layer implementation.</p>
-<p>In the current implementation, the API provides the ability to create a user, to update some/all user fields,  delete the user and search for users by birth date range.</p>
-<p>Various data validity checks have also been added.</p>
 
-## :nut_and_bolt: Tech Stack
-- Java 21
-- Spring Boot 3.2.5
-- Maven
-- MongoDB Database
-- Jackson
-- Apache Tomcat
-- JUnit 5 for Testing
-- Log4j Logging
+Java practical test assignment
 
-## :rocket: How to run
-1. Install the JDK v21+. Set the JAVA_HOME environment variable to the installation directory.
-2. Install Git. It's essential for version control. Install Git on your machine to clone the project and manage changes.
-3. Choose an Integrated Development Environment (IDE). Select a suitable IDE for Java development. Popular choices include IntelliJ IDEA, Eclipse, or Apache NetBeans.
-4. Install and Configure Apache Tomcat. Download and install Apache Tomcat, an open-source servlet container. Configure it in your IDE to deploy and run the application.
-5. Install and Configure MongoDB, which is used as the database for the project. Configure the application properties with the database connection details.
-6. Clone the project repository from GitHub using Git. Import the project into your chosen IDE as a Maven project.
-7. Configure Application Properties. Set up any required configuration in the application properties file, such as database connection details, server port, log path, etc.
-8. Build the project using Maven and run it on the configured Apache Tomcat server in your IDE.
-9. Verify Deployment and that the application is running correctly.
-10. You can find JSON samples for request in resource folder.
+The task has two parts:
+1. Using the resources listed below learn what is RESTful API and what are the best practices to implement it 
+2. According to the requirements implement the RESTful API based on the web Spring Boot application: controller, responsible for the resource named Users. 
 
-## :man: Author
+Resources:
+1.	RESTful API Design. Best Practices in a Nutshell.
+2.	Error Handling for REST with Spring | Baeldung
+3.	Testing in Spring Boot | Baeldung
+4.	Testing | Spring
 
-👤 **Eugeny Prokop**
+Wrap the Actual Data in a data Field
 
-- LinkedIn: [@EugenyProkop](https://www.linkedin.com/in/eugeny-prokop)
-- GitHub: [@EugenyProkop](https://github.com/p1q)
+Requirements:
+1. It has the following fields:
+1.1. Email (required). Add validation against email pattern
+1.2. First name (required)
+1.3. Last name (required)
+1.4. Birth date (required). Value must be earlier than current date
+1.5. Address (optional)
+1.6. Phone number (optional)
+2. It has the following functionality:
+2.1. Create user. It allows to register users who are more than [18] years old. The value [18] should be taken from properties file.
+2.2. Update one/some user fields
+2.3. Update all user fields
+2.4. Delete user
+2.5. Search for users by birth date range. Add the validation which checks that “From” is less than “To”.  Should return a list of objects
+3. Code is covered by unit tests using Spring 
+4. Code has error handling for REST
+5. API responses are in JSON format
+6. Use of database is not necessary. The data persistence layer is not required.
+7. Any version of Spring Boot. Java version of your choice
+8. You can use Spring Initializer utility to create the project: Spring Initializr
 
-## :scroll: License
-
-Copyright © 2024 [Eugeny Prokop](https://github.com/p1q).<br />
-This project is MIT licensed. See the [License](https://github.com/p1q/ApiTestTask/blob/main/LICENSE) file.
+Please note: 
+we assess only those assignments where all requirements are implemented
