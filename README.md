@@ -1,4 +1,5 @@
 Clear Solutions
+
 Trainee/Junior Java Developer Test Task
 https://docs.google.com/document/d/1LosRgr72sJYcNumbZKET7uiIJ3Un_ORl25Psn1Dd9hw
 
